@@ -1,0 +1,141 @@
+/* Kept separate from Tailwind's generated stylesheet for reliable hot updates. */
+html, body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.home-screen {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: #0c0e16;
+  color: #f5f3ff;
+}
+
+.home-pixels, .home-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  pointer-events: none;
+}
+
+.home-vignette {
+  background: radial-gradient(ellipse at center, #0c0e16f5 0%, #0c0e16b0 30%, transparent 75%), linear-gradient(#0c0e1680, transparent 35%, #0c0e1680);
+}
+
+.home-header, .home-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px clamp(24px, 4vw, 72px);
+}
+
+.home-logo {
+  font-size: 30px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -1.8px;
+  text-decoration: none;
+}
+
+.home-logo span, .home-content h1 span { color: #b49aff; }
+.home-header nav { display: flex; gap: 10px; }
+.home-header nav a {
+  display: block;
+  padding: 12px 18px;
+  border: 1px solid #ffffff12;
+  border-radius: 7px;
+  background: #141723b0;
+  color: #b9bacb;
+  font-size: 12px;
+  text-decoration: none;
+  transition: color .2s, background .2s;
+}
+.home-header nav a:hover { color: #fff; background: #29283b; }
+
+.home-main {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 40px 24px 64px;
+}
+
+.home-content {
+  width: min(100%, 460px);
+  text-align: center;
+  animation: home-enter .6s ease-out both;
+}
+
+.home-icon { display: grid; grid-template-columns: repeat(2, 15px); justify-content: center; gap: 5px; margin-bottom: 24px; transform: rotate(-8deg); }
+.home-icon i, .home-footer i { display: block; background: #b49aff; border-radius: 2px; }
+.home-icon i { width: 15px; height: 15px; animation: home-float 5s ease-in-out infinite; }
+.home-icon i:nth-child(2), .home-footer i:nth-child(2) { background: #35d7cf; animation-delay: -.8s; }
+.home-icon i:nth-child(3), .home-footer i:nth-child(3) { background: #f17eb8; animation-delay: -1.6s; }
+.home-icon i:nth-child(4), .home-footer i:nth-child(4) { background: #a5e36e; animation-delay: -2.4s; }
+
+.home-content h1 {
+  margin: 0;
+  font-size: clamp(100px, 12vw, 164px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.08em;
+  text-shadow: 0 5px 0 #30263e, 0 14px 70px #ac8cfa30;
+}
+
+.home-tagline { margin: 24px 0 38px; color: #a8a6bb; font-size: 14px; letter-spacing: 2px; }
+.home-play {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 268px);
+  min-height: 64px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  border: 1px solid #ded1ff80;
+  border-radius: 9px;
+  background: #b49aff;
+  color: #20162f;
+  font-size: 21px;
+  font-weight: 750;
+  text-decoration: none;
+  box-shadow: 0 5px 0 #554272, 0 12px 40px #ac8cfa25;
+  transition: transform .2s, background .2s, box-shadow .2s;
+}
+.home-play span { font-size: 13px; }
+.home-play span:last-child { font-size: 20px; }
+.home-play:hover { background: #c7b1ff; transform: translateY(-3px); box-shadow: 0 8px 0 #554272, 0 16px 50px #ac8cfa35; }
+.home-play:active { transform: translateY(4px); box-shadow: 0 1px 0 #554272; }
+.home-mode { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 22px; font-size: 11px; color: #9595aa; }
+.home-mode i { width: 5px; height: 5px; border-radius: 50%; background: #a5e36e; }
+.home-footer { color: #898ca3; font-family: monospace; font-size: 10px; letter-spacing: .5px; }
+.home-footer > div { display: flex; gap: 6px; }
+.home-footer i { width: 6px; height: 6px; }
+.home-screen a:focus-visible { outline: 2px solid #e4d9ff; outline-offset: 6px; }
+
+@keyframes home-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes home-float { 50% { transform: translateY(-4px); } }
+@media (max-width: 600px) {
+  .home-header, .home-footer { padding: 22px; gap: 12px; }
+  .home-header nav { gap: 6px; }
+  .home-header nav a { padding: 10px 14px; }
+  .home-main { padding: 36px 24px 48px; }
+}
+@media (max-height: 650px) and (min-width: 601px) {
+  .home-content h1 { font-size: 100px; }
+  .home-icon { display: none; }
+  .home-main { padding-block: 16px 28px; }
+  .home-tagline { margin-block: 18px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-content, .home-icon i { animation: none; }
+  .home-screen a { transition: none; }
+}

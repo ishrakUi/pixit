@@ -6,12 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test tests/game.test.cjs tests/sessions.test.cjs tests/session-route.test.cjs"
   },
   "dependencies": {
+    "firebase": "^12.19.0",
+    "firebase-admin": "^13.10.0",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"
+  },
+  "overrides": {
+    "@firebase/app": "0.16.2",
+    "@firebase/app-compat": "0.5.18"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
