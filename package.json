@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/game.test.cjs tests/sessions.test.cjs tests/session-route.test.cjs"
+    "test": "node --test tests/game.test.cjs tests/sessions.test.cjs tests/session-route.test.cjs tests/board-camera.test.cjs"
   },
   "dependencies": {
     "firebase": "^12.19.0",

@@ -1,23 +1,27 @@
-/* Dense boards keep the overview visible; zooming scrolls only this viewport. */
-.board-surface { min-width: 0; }
-.board-view-controls { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 0 9px; color: #9b90ae; font: 10px monospace; }
-.board-view-controls > div { display: flex; gap: 3px; }
-.board-view-controls button { min-width: 36px; min-height: 30px; padding: 5px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #b6a8ca; font-size: 11px; }
-.board-view-controls button[aria-pressed="true"] { background: #31263f; border-color: #685280; color: #eee3ff; }
-.board-viewport { width: 100%; min-width: 0; aspect-ratio: 1; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #645077 #13121a; }
-.board-surface .pixel-grid { height: auto; aspect-ratio: 1; gap: 1px; }
-.board-surface .pixel { min-height: 0; border-radius: 1px; touch-action: manipulation; }
-.board-surface .pixel:focus-visible { z-index: 2; outline: 2px solid white; outline-offset: -1px; }
 .host-name { padding: 18px 0; }
 .host-name label { display: block; margin-bottom: 9px; font-size: 12px; color: #b8a9cb; }
 .host-name > div { display: flex; gap: 9px; }
 .host-name input { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #4c3d5e; border-radius: 7px; background: #101018; color: #f5efff; font: inherit; }
 .host-name input:focus { outline: 2px solid #b49aff; outline-offset: 2px; }
 .game-sidebar > .host-name { padding: 16px; border: 1px solid #30283b; border-radius: 10px; }
+
+/* Square canvas viewport: ten cells across at every screen size. */
+.board-surface { min-width: 0; width: 100%; }
+.canvas-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; color: #a99abf; font: 10px monospace; }
+.claim-canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; background: #101119; border-radius: 4px; touch-action: none; cursor: grab; }
+.claim-canvas.is-panning { cursor: grabbing; }
+.claim-canvas:focus-visible { outline: 2px solid #cfb4ff; outline-offset: 3px; }
+.canvas-navigation { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; }
+.board-overview { flex: 0 0 84px; width: 84px; height: 84px; padding: 0; overflow: hidden; border: 1px solid #554367; border-radius: 5px; background: #20212e; cursor: crosshair; }
+.board-overview canvas { display: block; width: 100%; height: 100%; }
+.canvas-pan-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.canvas-pan-controls > div { display: flex; gap: 5px; }
+.canvas-pan-controls button { display: grid; place-items: center; min-width: 40px; min-height: 40px; padding: 5px; border: 1px solid #443550; border-radius: 6px; background: #251e30; color: #d9c5f9; font-size: 18px; touch-action: manipulation; }
+.canvas-pan-controls button:hover { background: #382b48; }
+.canvas-pan-controls > span { color: #9d90ae; font-size: 10px; }
+.board-screenreader { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 @media (min-width: 1100px) {
-  .game-page .board-viewport { height: clamp(500px, calc(100svh - 290px), 1000px); aspect-ratio: auto; }
-  .game-page .board-surface .pixel-grid { height: 100%; aspect-ratio: auto; gap: 2px; }
-  .game-page .board-surface .pixel-grid.is-zoomed { height: auto; aspect-ratio: 1; }
+  .game-page .game-layout { max-width: min(100%, calc(100svh + 20px)); margin-inline: auto; }
 }
 @media (max-width: 760px) {
   .game-page { padding-inline: 8px; }
@@ -26,14 +30,13 @@
   .game-page .game-layout { gap: 12px; }
   .game-page .board-overlay { padding: 15px; }
   .game-page .board-overlay h2 { font-size: 22px; }
-  .board-view-controls button { min-height: 36px; min-width: 40px; }
   .game-sidebar > .room-share, .game-sidebar > .host-name, .game-sidebar > .local-note { grid-column: 1 / -1; }
   .game-sidebar > .room-share { order: 2; }
   .game-sidebar > .host-name { order: 3; }
   .game-sidebar > .local-note { order: 4; }
   .game-sidebar .room-code-row { flex-direction: row; align-items: center; flex-wrap: wrap; }
   .session-toolbar { padding-inline: 6px; }
-}
-@media (hover: none) {
-  .board-surface .pixel:not(:disabled):hover { transform: none; box-shadow: none; }
+  .canvas-pan-controls button { min-height: 44px; min-width: 40px; }
+  .board-overview { width: 76px; height: 76px; flex-basis: 76px; }
+  .canvas-navigation { gap: 8px; }
 }
