@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useReducer, useState } from "react";
 import { claim, COLORS, GameState, initialGame, rankings, DURATION, tick } from "@/lib/game";
@@ -41,7 +41,7 @@ function PracticeGame() {
       <div className="game-layout">
         <section className="arena card" aria-label="Game board">
           <div className="arena-toolbar">
-            <div><i className="live-dot" /><strong>{finished ? "Finished" : state.started ? "Playing" : "Practice"}</strong><span className="tiny-label">20 × 20</span></div>
+            <div><i className="live-dot" /><strong>{finished ? "Finished" : state.started ? "Playing" : "Practice"}</strong><span className="tiny-label">50 × 50</span></div>
             <div className={`timer ${remaining <= 30 ? "urgent" : ""}`} aria-label="Time remaining"><span>{Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")}</span></div>
           </div>
           <div className="board-frame">

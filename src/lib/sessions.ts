@@ -2,6 +2,8 @@
 export const SESSION_COLORS = ["#ac8cfa", "#35d7cf", "#f17eb8", "#a5e36e"];
 export const ROUND_MS = 300_000;
 export const REGEN_MS = 2_000;
+export const SESSION_SIZE = 50;
+export const SESSION_CELLS = SESSION_SIZE * SESSION_SIZE;
 export type Player = {
   uid: string; name: string; slot: number; energy: number; energyAt: number;
   score: number; wins: number; lastClaimAt: number;
@@ -18,7 +20,11 @@ export type Session = {
 export class SessionError extends Error {
   constructor(message: string, public status = 400) { super(message); }
 }
-export type SessionAction = "join" | "start" | "claim" | "finish";
+export type SessionAction = "join" | "start" | "claim" | "finish" | "rename";
+
+export function playerName(value: string) {
+  return value.replace(/[\u0000-\u001f]/g, "").trim().replace(/\s+/g, " ").slice(0, 18);
+}
 
 export function energyAt(player: Player, now: number) {
   return Math.min(10, player.energy + Math.floor(Math.max(0, now - player.energyAt) / REGEN_MS));
@@ -27,8 +33,8 @@ export function energyAt(player: Player, now: number) {
 export function newSession(uid: string, name: string, now: number): Session {
   return {
     host: uid, createdAt: now, status: "waiting", round: 0, startsAt: 0, endsAt: 0,
-    board: Array<number>(400).fill(-1), players: {
-      [uid]: { uid, name, slot: 0, energy: 10, energyAt: now, score: 0, wins: 0, lastClaimAt: 0 },
+    board: Array<number>(SESSION_CELLS).fill(-1), players: {
+      [uid]: { uid, name: playerName(name) || "Host", slot: 0, energy: 10, energyAt: now, score: 0, wins: 0, lastClaimAt: 0 },
     }, results: {},
   };
 }
@@ -68,13 +74,21 @@ export function updateSession(
     const used = new Set(Object.values(room.players).map(player => player.slot));
     const slot = [0, 1, 2, 3].find(value => !used.has(value))!;
     room.players[uid] = {
-      uid, name: input.name || `Player ${slot + 1}`, slot, energy: 10,
+      uid, name: playerName(input.name || "") || `Player ${slot + 1}`, slot, energy: 10,
       energyAt: now, score: 0, wins: 0, lastClaimAt: 0,
     };
     settle(room, now);
     return room;
   }
   if (!room.players[uid]) throw new SessionError("Join this session first", 403);
+  if (action === "rename") {
+    if (uid !== room.host) throw new SessionError("Only the host can edit the host name", 403);
+    const name = playerName(input.name || "");
+    if (!name) throw new SessionError("Enter a name");
+    room.players[uid].name = name;
+    settle(room, now);
+    return room;
+  }
   const wasPlaying = room.status === "playing";
   settle(room, now);
   // Always commit settlement, including a claim arriving at/after the deadline.
@@ -87,7 +101,7 @@ export function updateSession(
     room.round += 1;
     room.startsAt = now;
     room.endsAt = now + ROUND_MS;
-    room.board = Array<number>(400).fill(-1);
+    room.board = Array<number>(SESSION_CELLS).fill(-1);
     for (const player of Object.values(room.players)) {
       player.energy = 10; player.energyAt = now; player.score = 0; player.lastClaimAt = 0;
     }
@@ -95,7 +109,7 @@ export function updateSession(
   }
   if (room.status !== "playing") throw new SessionError("Round is not running", 409);
   const index = input.index;
-  if (!Number.isInteger(index) || index! < 0 || index! >= 400) throw new SessionError("Invalid pixel");
+  if (!Number.isInteger(index) || index! < 0 || index! >= room.board.length) throw new SessionError("Invalid pixel");
   const player = room.players[uid];
   const owner = room.board[index!];
   if (owner === player.slot) return room;

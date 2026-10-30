@@ -13,9 +13,9 @@ new Function("module", "exports", source)(engine, engine.exports);
 const { initialGame, claim, tick, rankings, DURATION } = engine.exports;
 const start = () => ({ ...initialGame(), started: true });
 
-test("starts with 400 cells, unique equal territories, and full energy", () => {
+test("starts with 2500 cells, unique equal territories, and full energy", () => {
   const state = initialGame();
-  assert.equal(state.board.length, 400);
+  assert.equal(state.board.length, 2500);
   assert.deepEqual(rankings(state.board).map(player => player.score), [6, 6, 6, 6]);
   assert.deepEqual(state.energy, [10, 10, 10, 10]);
   assert.equal(claim(state, 0), state);
@@ -27,16 +27,16 @@ test("claims and captures apply exact costs and transfer territory", () => {
   assert.equal(claimed.energy[0], 9);
   assert.equal(claimed.board[0], 0);
   assert.equal(original.board[0], -1);
-  const captured = claim(claimed, 132);
+  const captured = claim(claimed, 636);
   assert.equal(captured.energy[0], 7);
   assert.equal(rankings(captured.board).find(player => player.id === 0).score, 8);
   assert.equal(rankings(captured.board).find(player => player.id === 1).score, 5);
-  assert.equal(claim(captured, 132).energy[0], 7);
+  assert.equal(claim(captured, 636).energy[0], 7);
 });
 
 test("rejects unaffordable moves and regenerates every two ticks up to cap", () => {
   let state = { ...start(), energy: [1, 10, 10, 10] };
-  assert.deepEqual(claim(state, 132).board, state.board);
+  assert.deepEqual(claim(state, 636).board, state.board);
   state = claim(state, 0);
   assert.equal(state.energy[0], 0);
   assert.equal(claim(state, 1).board[1], -1);

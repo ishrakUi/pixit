@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./menu.css";
 import "./sessions.css";
+import "./board.css";
 
 export const metadata: Metadata = {
   title: "PIXIT — Claim it. Own it. Pixit.",

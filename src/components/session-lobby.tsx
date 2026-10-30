@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { Player, SESSION_COLORS } from "@/lib/sessions";
 
 type EntryProps = {
@@ -61,12 +61,21 @@ export function RoomShare({ code, feedback, onCopy }: ShareProps) {
   </section>;
 }
 
-export function RoomLobby({ code, feedback, onCopy, players, uid, host, busy, connected, onStart }: ShareProps & {
-  players: Player[]; uid: string; host: string; busy: boolean; connected: boolean; onStart: () => void;
+export function HostName({ initialName, busy, onSave }: { initialName: string; busy: boolean; onSave: (name: string) => void }) {
+  const [name, setName] = useState(initialName);
+  return <form className="host-name" onSubmit={event => { event.preventDefault(); if (name.trim()) onSave(name.trim()); }}>
+    <label htmlFor="host-name">Your name</label>
+    <div><input id="host-name" value={name} onChange={event => setName(event.target.value)} maxLength={18} required autoComplete="nickname" /><button className="session-button" disabled={busy || !name.trim() || name.trim() === initialName}>Save</button></div>
+  </form>;
+}
+
+export function RoomLobby({ code, feedback, onCopy, players, uid, host, busy, connected, onStart, onRename }: ShareProps & {
+  players: Player[]; uid: string; host: string; busy: boolean; connected: boolean; onStart: () => void; onRename: (name: string) => void;
 }) {
   return <section className="card room-lobby">
     <div className="room-lobby-heading"><div><span className="session-kicker">YOUR ROOM</span><h1>Waiting for players</h1></div><span className="room-capacity">{players.length} / 4</span></div>
     <RoomShare code={code} feedback={feedback} onCopy={onCopy} />
+    {uid === host && <HostName key={players.find(player => player.uid === uid)?.name} initialName={players.find(player => player.uid === uid)?.name || "Host"} busy={busy || !connected} onSave={onRename} />}
     <div className="room-players" aria-label="Players in room">{Array.from({ length: 4 }, (_, slot) => {
       const player = players.find(player => player.slot === slot);
       return <div className={`room-player ${!player ? "empty-slot" : ""}`} key={slot}><i style={{ background: player ? SESSION_COLORS[slot] : undefined }} aria-hidden="true" /><span>{player ? player.name : "Open slot"}{player?.uid === uid && <small>YOU</small>}</span>{player?.uid === host && <small>HOST</small>}</div>;

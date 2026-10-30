@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       }
       throw new SessionError("Could not create session. Try again.", 503);
     }
-    const actions: SessionAction[] = ["join", "start", "claim", "finish"];
+    const actions: SessionAction[] = ["join", "start", "claim", "finish", "rename"];
     if (!actions.includes(body.action as SessionAction)) throw new SessionError("Invalid action");
     const code = typeof body.code === "string" ? body.code.toUpperCase() : "";
     if (!/^[A-F0-9]{8}$/.test(code)) throw new SessionError("Enter an 8-character session code");

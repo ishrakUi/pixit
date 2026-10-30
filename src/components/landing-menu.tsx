@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
@@ -97,7 +97,7 @@ export function LandingMenu() {
           <p className="home-mode"><i /> Live sessions · up to 4 players</p>
         </div>
       </main>
-      <footer className="home-footer"><span>20 × 20</span><div aria-hidden="true"><i /><i /><i /><i /></div><span>5 minute rounds</span></footer>
+      <footer className="home-footer"><span>50 × 50</span><div aria-hidden="true"><i /><i /><i /><i /></div><span>5 minute rounds</span></footer>
     </div>
   );
 }

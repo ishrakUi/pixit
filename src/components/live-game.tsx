@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { onValue, ref } from "firebase/database";
 import { firebaseClient, sessionUser } from "@/lib/firebase/client";
 import { energyAt, Session, SESSION_COLORS } from "@/lib/sessions";
 import { PixelBoard } from "./pixel-board";
-import { RoomLobby, RoomShare, SessionEntry } from "./session-lobby";
+import { HostName, RoomLobby, RoomShare, SessionEntry } from "./session-lobby";
 
 async function operation(action: string, data: Record<string, unknown> = {}) {
   const user = await sessionUser();
@@ -105,7 +105,7 @@ export function LiveGame({ onPractice }: { onPractice: () => void }) {
     return () => { cancelled = true; clearInterval(timer); };
   }, [code, roundStatus, deadline, connected]);
 
-  async function run(action: string, data: Record<string, unknown> = {}) {
+  const run = useCallback(async (action: string, data: Record<string, unknown> = {}) => {
     if (pending.current) return;
     pending.current = true;
     setBusy(true);
@@ -127,7 +127,9 @@ export function LiveGame({ onPractice }: { onPractice: () => void }) {
       pending.current = false;
       setBusy(false);
     }
-  }
+  }, [code]);
+
+  const claimPixel = useCallback((index: number) => { void run("claim", { index }); }, [run]);
 
   function leave() {
     setCode(""); setRoom(null); setLast(null); setError(""); setMode("choose"); setSavedCode(""); setCopied("");
@@ -163,13 +165,13 @@ export function LiveGame({ onPractice }: { onPractice: () => void }) {
         <>
           <div className="session-toolbar"><div><strong>{code}</strong><span>{connected ? "Live" : "Reconnecting…"}</span></div><div><button className="session-button" onClick={() => void copyShare("code")}>Copy code</button><button className="session-button" onClick={leave}>Back</button></div></div>
           {!room || !me ? <div className="card session-lobby"><p>Loading session…</p><button className="session-button" onClick={() => setRetry(value => value + 1)}>Reconnect</button></div> : room.status === "waiting" ? (
-            <RoomLobby code={code} feedback={copied} onCopy={kind => void copyShare(kind)} players={players} uid={uid} host={room.host} busy={busy} connected={connected} onStart={() => void run("start")} />
+            <RoomLobby code={code} feedback={copied} onCopy={kind => void copyShare(kind)} players={players} uid={uid} host={room.host} busy={busy} connected={connected} onStart={() => void run("start")} onRename={name => void run("rename", { name })} />
           ) : (
             <div className="game-layout">
               <section className="arena card" aria-label="Live game board">
                 <div className="arena-toolbar"><div><i className="live-dot" /><strong>{finished ? "Finished" : "Playing"}</strong><span className="tiny-label">{players.length}/4</span></div><div className={`timer ${seconds <= 30 ? "urgent" : ""}`} aria-label="Time remaining"><span>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}</span></div></div>
                 <div className="board-frame">
-                  <PixelBoard board={room.board} colors={SESSION_COLORS} ownSlot={me.slot} disabled={room.status !== "playing" || seconds === 0 || busy || !connected} last={last} onClaim={index => void run("claim", { index })} />
+                  <PixelBoard board={room.board} colors={SESSION_COLORS} ownSlot={me.slot} disabled={room.status !== "playing" || seconds === 0 || busy || !connected} last={last} onClaim={claimPixel} />
                   {(room.status !== "playing" || seconds === 0) && <div className="board-overlay">
                     <h2>{finished ? result?.winners.length === 1 ? result.winners[0] === uid ? "You win" : `${room.players[result.winners[0]].name} wins` : "Draw" : seconds === 0 ? "Saving result…" : "Ready?"}</h2>
                     <p>{finished ? `${players[0]?.score || 0} pixels` : ""}</p>
@@ -179,6 +181,7 @@ export function LiveGame({ onPractice }: { onPractice: () => void }) {
                 <div className="board-footer"><span><i style={{ background: SESSION_COLORS[me.slot] }} /> You</span><span>Claim <b>1 ⚡</b><span className="divider">/</span>Steal <b>2 ⚡</b></span></div>
               </section>
               <aside className="game-sidebar">
+                {isHost && <HostName key={me.name} initialName={me.name} busy={busy || !connected} onSave={name => void run("rename", { name })} />}
                 <RoomShare code={code} feedback={copied} onCopy={kind => void copyShare(kind)} />
                 <section className="card player-card"><div className="player-summary"><h2>{me.name}</h2><strong>{me.score}<span> pixels</span></strong></div><div className="energy-heading"><span>Energy</span><strong>{energy}<span> / 10</span></strong></div><div className="energy-bars" aria-label={`${energy} of 10 energy`}>{Array.from({ length: 10 }, (_, index) => <i key={index} className={index < energy ? "charged" : ""} />)}</div><div className="energy-note">+1 / 2s</div></section>
                 <section className="card scoreboard"><div className="card-heading"><h2>Scores</h2></div>{players.map((player, index) => <div className={`score-row ${player.uid === uid ? "you-row" : ""}`} key={player.uid}><span className="rank">{index + 1}</span><i className="avatar" style={{ background: SESSION_COLORS[player.slot] }} /><span className="player-name">{player.name}{player.uid === uid ? " (you)" : ""}</span><strong>{player.score}</strong></div>)}</section>

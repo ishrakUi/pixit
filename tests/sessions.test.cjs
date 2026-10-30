@@ -51,7 +51,7 @@ test("recharge preserves partial time and never banks energy above cap", () => {
 
 test("invalid indexes, insufficient energy, and excessive claim rate are rejected", () => {
   let room = playing();
-  for (const index of [-1, 400, 1.5, NaN]) assert.throws(() => updateSession(room, "a", "claim", T + 100, { index }), /Invalid/);
+  for (const index of [-1, 2500, 1.5, NaN]) assert.throws(() => updateSession(room, "a", "claim", T + 100, { index }), /Invalid/);
   for (let index = 0; index < 10; index++) room = updateSession(room, "a", "claim", T + 100 + index * 100, { index });
   assert.equal(room.players.a.energy, 0);
   assert.throws(() => updateSession(room, "a", "claim", T + 1200, { index: 10 }), /energy/);
@@ -84,4 +84,30 @@ test("winner, replay reset, retained history, and membership survive serializati
   assert.equal(room.players.a.wins, 1);
   assert.equal(room.board.filter(owner => owner !== -1).length, 0);
   assert.equal(room.results[1].scores.a, 1);
+});
+
+test("host can rename without changing gameplay, and others cannot rename the host", () => {
+  const room = playing();
+  const renamed = updateSession(room, "a", "rename", T + 100, { name: "  Zarin   Pixit  " });
+  assert.equal(renamed.players.a.name, "Zarin Pixit");
+  assert.equal(room.players.a.name, "Alice");
+  assert.deepEqual(renamed.board, room.board);
+  assert.equal(renamed.players.a.energy, room.players.a.energy);
+  assert.throws(() => updateSession(room, "b", "rename", T + 100, { name: "Fake host" }), /host/);
+  assert.throws(() => updateSession(room, "a", "rename", T + 100, { name: " \n " }), /Enter a name/);
+  assert.equal(updateSession(room, "a", "rename", T + 100, { name: "x".repeat(40) }).players.a.name.length, 18);
+});
+
+test("50x50 boards validate the last cell and legacy rounds keep their bounds until replay", () => {
+  let room = playing();
+  assert.equal(room.board.length, 2500);
+  room = updateSession(room, "a", "claim", T + 100, { index: 2499 });
+  assert.equal(room.board[2499], 0);
+  assert.equal(room.players.a.score, 1);
+  assert.throws(() => updateSession(room, "a", "claim", T + 300, { index: 2500 }), /Invalid pixel/);
+  let legacy = { ...playing(), board: Array(400).fill(-1) };
+  assert.throws(() => updateSession(legacy, "a", "claim", T + 100, { index: 400 }), /Invalid pixel/);
+  legacy = updateSession(legacy, "a", "finish", T + ROUND_MS);
+  legacy = updateSession(legacy, "a", "start", T + ROUND_MS + 100);
+  assert.equal(legacy.board.length, 2500);
 });
